@@ -8,7 +8,7 @@ def get_unique_links(existing_links, new_links):
     return unique_new_links
 
 def main():
-    st.title("Unique Link Finder")
+    st.title("Vikash Goyal's New Project: Find Links")
 
     st.write("Upload an Excel file and provide a list of new links.")
     
