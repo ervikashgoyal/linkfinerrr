@@ -2,13 +2,13 @@ import streamlit as st
 import tldextract
 from openpyxl import load_workbook
 
-def get_similar_links(existing_links, new_links):
-    existing_domains = {tldextract.extract(link).domain for link in existing_links}
-    similar_existing_links = [link for link in existing_links if tldextract.extract(link).domain in existing_domains]
-    return similar_existing_links
+def get_similar_domains(existing_links, new_links):
+    new_domains = {tldextract.extract(link).domain for link in new_links}
+    similar_domains = {tldextract.extract(link).domain for link in existing_links if tldextract.extract(link).domain in new_domains}
+    return similar_domains
 
 def main():
-    st.title("Vikash Goyal's New Project: Find Similar Links")
+    st.title("Vikash Goyal's New Project: Find Similar Domains")
 
     st.write("Provide existing links and new links row-wise.")
     
@@ -19,11 +19,11 @@ def main():
         existing_links = [link.strip() for link in existing_links_input.split("\n") if link.strip()]
         new_links = [link.strip() for link in new_links_input.split("\n") if link.strip()]
         
-        similar_links = get_similar_links(existing_links, new_links)
+        similar_domains = get_similar_domains(existing_links, new_links)
         
-        st.write("Similar Existing Links:")
-        for link in similar_links:
-            st.write(link)
+        st.write("Similar Domains in Existing Links:")
+        for domain in similar_domains:
+            st.write(domain)
 
 if __name__ == "__main__":
     main()
