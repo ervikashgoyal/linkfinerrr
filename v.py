@@ -10,19 +10,14 @@ def get_unique_links(existing_links, new_links):
 def main():
     st.title("Vikash Goyal's New Project: Find Links")
 
-    st.write("Upload an Excel file and provide new links row-wise.")
+    st.write("Provide existing links and new links row-wise.")
     
-    excel_file = st.file_uploader("Upload Excel file", type=["xlsx"])
+    existing_links_input = st.text_area("Enter existing links row-wise (one link per row)")
     new_links_input = st.text_area("Enter new links row-wise (one link per row)")
 
-    if excel_file and new_links_input:
+    if existing_links_input and new_links_input:
+        existing_links = [link.strip() for link in existing_links_input.split("\n") if link.strip()]
         new_links = [link.strip() for link in new_links_input.split("\n") if link.strip()]
-        
-        existing_links = []
-        if excel_file:
-            workbook = load_workbook(excel_file)
-            sheet = workbook.active
-            existing_links = [sheet.cell(row=row_num, column=1).value for row_num in range(2, sheet.max_row + 1)]
         
         unique_links = get_unique_links(existing_links, new_links)
         
