@@ -1,34 +1,59 @@
 import streamlit as st
-import tldextract
-from openpyxl import load_workbook
+import pandas as pd
+from urllib.parse import urlparse
 
-def get_unique_links(existing_links, new_links):
-    existing_domains = {tldextract.extract(link).domain for link in existing_links}
-    unique_new_links = [link for link in new_links if tldextract.extract(link).domain not in existing_domains]
+# Load existing links from an Excel file
+existing_links_file = "existing_links.xlsx"
+try:
+    df_existing = pd.read_excel(existing_links_file)
+except FileNotFoundError:
+    df_existing = pd.DataFrame(columns=["Link"])
+
+# Streamlit app header
+st.title("Link Deduplicator")
+
+# Input box for pasting links
+st.subheader("Paste your links here (one per line):")
+links_input = st.text_area("Links", "", height=200)
+
+# Function to extract and deduplicate links
+def extract_and_deduplicate_links(links_input):
+    new_links = links_input.split('\n')
+    new_domains = set()
+    unique_new_links = []
+
+    for link in new_links:
+        if link.strip():
+            parsed_url = urlparse(link)
+            domain = parsed_url.netloc
+            if domain not in df_existing["Link"] and domain not in new_domains:
+                new_domains.add(domain)
+                unique_new_links.append(link)
+
     return unique_new_links
 
-def main():
-    st.title("Vikash Goyal's New Project: Find Links")
-
-    st.write("Upload an Excel file and provide a list of new links.")
+if st.button("Process Links"):
+    unique_new_links = extract_and_deduplicate_links(links_input)
     
-    excel_file = st.file_uploader("Upload Excel file", type=["xlsx"])
-    new_links_input = st.text_area("Enter new links (one link per line)")
+    # Append unique new links to the existing DataFrame
+    df_new = pd.DataFrame({'Link': unique_new_links})
+    df_updated = pd.concat([df_existing, df_new], ignore_index=True)
 
-    if excel_file and new_links_input:
-        new_links = [link.strip() for link in new_links_input.split("\n") if link.strip()]
-        
-        existing_links = []
-        if excel_file:
-            workbook = load_workbook(excel_file)
-            sheet = workbook.active
-            existing_links = [sheet.cell(row=row_num, column=1).value for row_num in range(2, sheet.max_row + 1)]
-        
-        unique_links = get_unique_links(existing_links, new_links)
-        
-        st.write("Unique Links:")
-        for link in unique_links:
-            st.write(link)
+    # Save the updated Excel file
+    df_updated.to_excel(existing_links_file, index=False)
 
-if __name__ == "__main__":
-    main()
+    st.success(f"Processed {len(unique_new_links)} unique links!")
+
+# Display the existing links
+st.subheader("Existing Links:")
+st.write(df_existing)
+
+# Download the updated Excel file
+st.subheader("Download Updated Excel File:")
+st.download_button(
+    label="Download Updated Links",
+    data=df_updated.to_excel(None, index=False),
+    key="download-link"
+)
+
+# Note: You can customize the appearance and layout of the Streamlit app as per your preferences.
