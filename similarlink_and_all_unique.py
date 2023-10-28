@@ -25,7 +25,7 @@ def main():
             st.session_state.current_link_idx = 0
 
         if st.button("Get Unique New Links"):
-            unique_new_links = list(set(new_links))
+            unique_new_links = list(set(new_links) - set(existing_links))
             st.write("Unique New Links:")
             st.write(unique_new_links)
 
